@@ -12,7 +12,7 @@ This is a **learning and experimentation environment** that demonstrates how to 
 - **[`orchestration.md`](orchestration.md)** - Advanced patterns for combining RAG tools  
 - **[`server.md`](server.md)** - MCP server architecture and tool registration
 
-## �️ Project Structure
+## 🏗️ Project Structure
 
 ```
 ├── server.py                          # MCP server with RAG tools
@@ -22,10 +22,11 @@ This is a **learning and experimentation environment** that demonstrates how to 
 │   └── rag_hello_two_mcp.ipynb       # Enhanced search with metadata
 ├── runs/                              # Executed notebooks (preserved for inspection)
 ├── data/                              # Sample corpus data
-└── docs/                              # Templates and patterns
-    ├── notebook.md                    # RAG notebook template
-    ├── orchestration.md               # Orchestration patterns
-    └── server.md                      # Server documentation
+└── mcptools/                          # MCP tool definitions (markdown-driven)
+    ├── list_workers.md                # List available RAG notebooks
+    ├── rag_semantic_search.md         # Basic semantic search tool
+    ├── rag_enhanced_search.md         # Enhanced search with metadata
+    └── rag_learning_search.md         # Learning-focused search tool
 ```
 
 ## 🚀 Quick Start
@@ -38,22 +39,18 @@ rag_mcp_orchestrator_demo.ipynb
 
 ### 2. Test MCP Tools
 ```python
-from server import rag_semantic_search, rag_enhanced_search
+# Run the MCP server
+python server.py
 
-# Get answer only
-result = rag_semantic_search("What is machine learning?")
-print(result["answer"])
-
-# Get chunks for processing
-result = rag_semantic_search("AI concepts", return_chunks=True, return_answer=False)
-chunks = result["chunks"]
+# Or use the test client
+python simple_client.py
 ```
 
 ### 3. Create New RAG Method
 1. Copy the template from `notebook.md`
-2. Implement your RAG approach
-3. Register it in `server.py` as a new MCP tool
-4. Use it standalone or in orchestration workflows
+2. Implement your RAG approach in `workers/`
+3. Add tool definition in `mcptools/` as a markdown file
+4. The server will automatically load it via `tool_loader.py`
 
 ## 🔧 Key Features
 
@@ -71,8 +68,8 @@ chunks = result["chunks"]
 
 ### Modern MCP Patterns
 - **FastMCP Integration**: Proper tool definitions with schema
-- **Rich Descriptions**: LLM-friendly tool documentation
-- **Flexible Transport**: In-memory for development, stdio for production
+- **Markdown-Driven Tools**: Tool definitions in `mcptools/*.md` with YAML frontmatter
+- **Dynamic Loading**: Automatic tool registration from markdown files
 - **Standard Protocol**: Compatible with MCP ecosystem
 
 ## 🎓 Educational Use Cases
@@ -99,10 +96,10 @@ chunks = result["chunks"]
 
 ### Multi-Method Fusion
 ```python
-# Combine semantic + keyword search
+# Combine semantic + enhanced search
 semantic_chunks = rag_semantic_search(query, return_chunks=True, return_answer=False)
-keyword_chunks = rag_keyword_search(query, return_chunks=True, return_answer=False)
-combined_result = rag_reranker(query, chunks=semantic_chunks + keyword_chunks)
+enhanced_chunks = rag_enhanced_search(query, return_chunks=True, return_answer=False)
+combined_result = combine_results(semantic_chunks, enhanced_chunks)
 ```
 
 ### Query Decomposition
@@ -113,23 +110,37 @@ all_chunks = []
 for sub_query in sub_queries:
     chunks = rag_semantic_search(sub_query, return_chunks=True, return_answer=False)
     all_chunks.extend(chunks)
-final_answer = rag_generator(complex_query, chunks=all_chunks)
+final_answer = generate_answer(complex_query, chunks=all_chunks)
 ```
 
-## 🛠️ Development
+## 🛠️ Technical Implementation
 
-### Adding New RAG Methods
-1. Follow the template in `notebook.md`
-2. Implement in `workers/your_method.ipynb`
-3. Add tool definition to `server.py`
-4. Test and document
+### MCP Server Architecture
+- **server.py**: Main MCP server with FastMCP framework
+- **tool_loader.py**: Dynamic tool loading from markdown definitions
+- **simple_client.py**: Test client for validation
+- **mcptools/**: Markdown files with YAML frontmatter defining tools
 
-### Advanced Patterns
-See `orchestration.md` for sophisticated combination strategies including:
-- Multi-method fusion
-- Iterative refinement  
-- Sub-query decomposition
-- Agentic orchestration
+### Key Technologies
+- **FastMCP 2.11.3**: MCP server framework
+- **Papermill**: Notebook execution engine
+- **Scrapbook**: Result extraction from notebooks
+- **python-frontmatter**: YAML frontmatter parsing
+- **Windows PowerShell**: Development environment
+
+## 🐛 Known Issues & Solutions
+
+### Path Resolution
+- **Issue**: VS Code directory context unreliable
+- **Solution**: Use `Path(__file__).parent` for absolute paths
+
+### Unicode Encoding
+- **Issue**: Windows PowerShell crashes on emoji output
+- **Solution**: Replace emojis with `[STATUS]` text format
+
+### FastMCP Parameters
+- **Issue**: FastMCP rejects `**kwargs` in tool functions
+- **Solution**: Use explicit parameter functions with proper typing
 
 ## 🎯 Next Steps
 
@@ -139,55 +150,15 @@ This system provides the foundation for exploring advanced RAG concepts:
 - **Adaptive RAG**: Dynamic method selection based on query characteristics  
 - **Multi-Stage Processing**: Iterative refinement and verification
 - **Agentic Workflows**: LLM-driven orchestration of multiple tools
+- **Error Handling**: Robust error handling improvements (planned)
+
+## 📈 Development Status
+
+- ✅ **Working MCP Server**: 5 tools registered and functional
+- ✅ **Client-Server Communication**: stdio transport working
+- ✅ **Dynamic Tool Loading**: Markdown-driven configuration
+- ✅ **Path Resolution**: Windows compatibility achieved
+- ✅ **Unicode Handling**: Emoji-safe output implemented
+- 🔄 **Error Handling**: Planned improvements for robustness
 
 Happy experimenting! 🚀
-# Open the clean template
-rag_mcp_clean.ipynb
-```
-
-### For MCP Learning
-```bash
-# See both mock and real approaches
-rag_mcp_educational.ipynb
-```
-
-### For External LLM Integration
-```bash
-python server.py
-# Connect your LLM client to this MCP server
-```
-
-## 🎯 Key Architecture
-
-**FastMCP In-Memory Connection** - perfect for notebook development:
-```python
-from fastmcp import Client
-from mcp.server.fastmcp import FastMCP
-
-# Create server
-mcp = FastMCP("my-server")
-
-# Connect in-memory (no stdio issues!)
-async with Client(mcp) as client:
-    result = await client.call_tool("my_tool", {})
-```
-
-**Training Focus:** Users learn to USE the MCP system, not build it  
-**MCP Course Focus:** Deep dive into MCP protocol and implementation details
-
-## 🎯 Key Insights
-
-**FastMCP In-Memory Connection** is the best approach for notebook development:
-```python
-from fastmcp import Client
-from mcp.server.fastmcp import FastMCP
-
-# Create server
-mcp = FastMCP("my-server")
-
-# Connect in-memory (no stdio issues!)
-async with Client(mcp) as client:
-    result = await client.call_tool("my_tool", {})
-```
-
-This avoids all the subprocess/stdio complexity while providing real MCP protocol compliance!
