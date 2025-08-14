@@ -48,6 +48,9 @@ git branch -d ai-experiment-YYYYMMDD-HHMMSS
 - If issues arise: easily revert to main branch
 - Keep main branch history clean and linear
 
+### Copilot Git Command Authorization
+Copilot is authorized to execute all necessary git commands (add, commit, branch, rebase, delete, etc.) as part of the session protocol, without requiring further user confirmation, unless explicitly revoked.
+
 ## Code Consistency Guidelines
 - Reference `.project/patterns.md` for established code patterns (when created)
 - Reference `.project/architecture.md` for component relationships (when created)
